@@ -1,0 +1,60 @@
+function ConvertFrom-Json {
+        <#
+        .ForwardHelpTargetName Microsoft.PowerShell.Utility\ConvertFrom-Json
+        .ForwardHelpCategory Cmdlet
+        #>
+        [CmdletBinding(HelpUri = 'http://go.microsoft.com/fwlink/?LinkID=217031', RemotingCapability = 'None')]
+        param(
+            [Parameter(Mandatory = $true,
+                Position = 0,
+                ValueFromPipeline = $true)]
+            [AllowEmptyString()]
+            [String] $InputObject,
+
+            [Parameter()]
+            [ValidateSet('Object', 'Hashtable')]
+            [String] $As = 'Object'
+        )
+
+        begin {
+            Write-Debug "Beginning $($MyInvocation.Mycommand)"
+            Write-Debug "Bound parameters:`n$($PSBoundParameters | out-string)"
+
+            try {
+                # Use this class to perform the deserialization:
+                # https://msdn.microsoft.com/en-us/library/system.web.script.serialization.javascriptserializer(v=vs.110).aspx
+                Add-Type -AssemblyName "System.Web.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" -ErrorAction Stop
+            }
+            catch {
+                throw "Unable to locate the System.Web.Extensions namespace from System.Web.Extensions.dll. Are you using .NET 4.5 or greater?"
+            }
+
+            $jsSerializer = New-Object -TypeName System.Web.Script.Serialization.JavaScriptSerializer
+        }
+
+        process {
+            switch ($As) {
+                'Hashtable' {
+                    $jsSerializer.Deserialize($InputObject, 'Hashtable')
+                }
+                default {
+                    # If we don't know what to do, use the native cmdlet.
+                    # This should also catch the -As Object case.
+
+                    # Remove -As since the native cmdlet doesn't understand it
+                    if ($PSBoundParameters.ContainsKey('As')) {
+                        $PSBoundParameters.Remove('As')
+                    }
+
+                    Write-Debug "Running native ConvertFrom-Json with parameters:`n$($PSBoundParameters | Out-String)"
+                    Microsoft.PowerShell.Utility\ConvertFrom-Json @PSBoundParameters
+                }
+            }
+        }
+
+        end {
+            $jsSerializer = $null
+            Write-Debug "Completed $($MyInvocation.Mycommand)"
+        }
+
+    }

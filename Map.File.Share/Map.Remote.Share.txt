@@ -1,0 +1,6 @@
+Write-Host " >> Mapping remote share: '$env:REMOTE_SHARE_DEVENV' to drive $env:Drive"
+
+net use $env:Drive "$env:REMOTE_SHARE_DEVENV" /u:athoc\bbot "$env:bbotPassword"
+if ($LASTEXITCODE -ne 0) {
+   throw "Remote share mapping failed."
+}

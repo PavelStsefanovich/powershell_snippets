@@ -1,0 +1,127 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <displayName>Lines of Code statistics</displayName>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.security.AuthorizationMatrixProperty/>
+    <hudson.plugins.buildblocker.BuildBlockerProperty plugin="build-blocker-plugin@1.7.3">
+      <useBuildBlocker>false</useBuildBlocker>
+      <blockLevel>GLOBAL</blockLevel>
+      <scanQueueFor>DISABLED</scanQueueFor>
+      <blockingJobs></blockingJobs>
+    </hudson.plugins.buildblocker.BuildBlockerProperty>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>30</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.25">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>Product</name>
+          <description>which product to run statistics for</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>IWS</string>
+              <string>NDS</string>
+              <string>PSS</string>
+              <string>SMS</string>
+              <string>DesktopWindows</string>
+              <string>TelephonyService</string>
+              <string>Automation</string>
+              <string>IWS_CHF</string>
+              <string>Provisionig</string>
+              <string>IWS_88</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>ReleaseRun</name>
+          <description>If checked, the current run will set new Release date to current date and update statistics comparison table upon completion</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>FromDate</name>
+          <description>Format: yyyy-mm-dd
+Statistics will be shown for period from FromDate to ToDate.
+If left empty, last release date for each product will be used instead of FromDate (stored in SVN: https://svn.athoc.com/athoc/etc/eng/build/SvnStatistics).</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ToDate</name>
+          <description>Format: yyyy-mm-dd
+Statistics will be shown for period from FromDate to ToDate.
+If left empty, current date will be used instead of ToDate.</description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <de.pellepelster.jenkins.walldisplay.WallDisplayJobProperty plugin="jenkinswalldisplay@0.6.30"/>
+  </properties>
+  <scm class="hudson.scm.SubversionSCM" plugin="subversion@1.54">
+    <locations>
+      <hudson.scm.SubversionSCM_-ModuleLocation>
+        <remote>https://svn.athoc.com/athoc/etc/eng/build/SvnStatistics</remote>
+        <depthOption>infinity</depthOption>
+        <ignoreExternalsOption>false</ignoreExternalsOption>
+      </hudson.scm.SubversionSCM_-ModuleLocation>
+    </locations>
+    <excludedRegions></excludedRegions>
+    <includedRegions></includedRegions>
+    <excludedUsers></excludedUsers>
+    <excludedRevprop></excludedRevprop>
+    <excludedCommitMessages></excludedCommitMessages>
+    <workspaceUpdater class="hudson.scm.subversion.UpdateWithCleanUpdater"/>
+    <ignoreDirPropChanges>false</ignoreDirPropChanges>
+    <filterChangelog>false</filterChangelog>
+  </scm>
+  <assignedNode>source</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <customWorkspace>e:\_jenkins\${JOB_NAME}</customWorkspace>
+  <builders>
+    <hudson.plugins.powershell.PowerShell plugin="powershell@1.3">
+      <command>if ($env:ReleaseRun -eq &apos;true&apos;) {
+     .\SvnStatistics\ParseDiffUnified.ps1 -Product $env:Product -ReleaseRun -FromDate $env:FromDate -ToDate $env:ToDate
+} else {
+     .\SvnStatistics\ParseDiffUnified.ps1 -Product $env:Product -FromDate $env:FromDate -ToDate $env:ToDate
+}</command>
+    </hudson.plugins.powershell.PowerShell>
+  </builders>
+  <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>SvnStatistics\${Product}\*.csv</artifacts>
+      <allowEmptyArchive>false</allowEmptyArchive>
+      <onlyIfSuccessful>true</onlyIfSuccessful>
+      <fingerprint>true</fingerprint>
+      <defaultExcludes>true</defaultExcludes>
+      <caseSensitive>false</caseSensitive>
+    </hudson.tasks.ArtifactArchiver>
+    <hudson.plugins.descriptionsetter.DescriptionSetterPublisher plugin="description-setter@1.10">
+      <regexp>(?&lt;=Description:\t).*\,\s\d\d\d\d\-\d\d\-\d\d\sto\s\d\d\d\d\-\d\d\-\d\d$</regexp>
+      <regexpForFailed></regexpForFailed>
+      <setForMatrix>false</setForMatrix>
+    </hudson.plugins.descriptionsetter.DescriptionSetterPublisher>
+  </publishers>
+  <buildWrappers>
+    <com.michelin.cio.hudson.plugins.maskpasswords.MaskPasswordsBuildWrapper>
+      <varPasswordPairs>
+        <varPasswordPair var="build.password" password="35jFPw2ZRkEAGCmQDneGUGcgE0ocwQlxsO1iZscwXT4="/>
+      </varPasswordPairs>
+    </com.michelin.cio.hudson.plugins.maskpasswords.MaskPasswordsBuildWrapper>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.3"/>
+  </buildWrappers>
+</project>

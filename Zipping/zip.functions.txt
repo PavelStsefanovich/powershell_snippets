@@ -1,0 +1,60 @@
+Param (
+  [string]$sourceDir,
+  [string]$destinationDir,
+  [string]$file
+)
+
+
+function unzipFile ($zipFile, $destinationDir, [switch]$multi) {
+  $filePath = $zipFile.FullName
+  if ($destinationDir) {
+    if ($multi) {
+      $toDir = $destinationDir + "\" + $zipFile.BaseName
+    } else {
+      $toDir = $destinationDir
+    }
+  } else {
+    $toDir = ($zipFile.FullName | Split-Path -Parent) +  "\" + $zipFile.BaseName
+  }
+  write " Extracting:"
+  write-host "   from:  '$filePath'" -ForegroundColor gray
+  write-host "   to:    '$toDir'" -ForegroundColor gray
+  Try {[io.compression.zipfile]::ExtractToDirectory($filePath,$toDir)}
+  Catch {write-error $_}
+}
+
+#- Init
+Try {Add-Type -AssemblyName "system.io.compression.filesystem"}
+Catch {Exit-OnError $_}
+
+#- Begin
+if ($file) {
+  $zipFile = Get-Item $file
+  unzipFile $zipFile -destinationDir:$destinationDir
+} else {
+  if (!$sourceDir) {
+    $sourceDir = $PWD.ToString()
+  }
+  if (!(Test-Path $sourceDir)) {
+    throw "!ERROR: <sourceDir> not found: $sourceDir"
+  }
+  $zipList = ls $sourceDir -File -Filter *.zip
+  if (!$zipList) {
+    write-error "No zip files found in $sourceDir"
+  } else {
+    $zipList | %{
+      unzipfile $_ -destinationDir:$destinationDir -multi
+    }
+  }
+}
+
+#- End
+write " DONE"
+exit
+
+CREATE ARCHIVE:
+1) [io.compression.zipfile]::CreateFromDirectory($source.fullname, $destination.zip)
+2) [io.compression.zipfile]::CreateFromDirectory($source.fullname, $destination.zip, "Optimal", $true)
+	Options:	Optimal/Fastest/NoCompression
+			true/false (base directory)
+

@@ -1,0 +1,14 @@
+ > w32tm /query /source
+ :> MDC109CNC.rim.net
+
+ > & "net" time \\MDC109CNC.rim.net /set /yes
+ :> Current time at \\MDC109CNC.rim.net is 2/01/18 3:35:28 PM
+ :> Local time (GMT-05:00) at \\MDC109CNC.rim.net is 2/01/18 6:35:28 PM
+ :> The command completed successfully.
+
+#- or
+
+ > w32tm /resync /force
+ :> Sending resync command to local computer
+ :> The command completed successfully.
+

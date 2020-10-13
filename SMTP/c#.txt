@@ -1,0 +1,17 @@
+            String body = msg;
+            SmtpClient smtpClient = new SmtpClient();
+            MailMessage message = new MailMessage();
+            MailAddress fromAddress = new MailAddress("bbot@athoc.com");
+            smtpClient.Host = "atcasht.athoc.com";//host
+            smtpClient.Port = 25;//port no. default 25
+            smtpClient.UseDefaultCredentials = true;
+            //smtpClient.EnableSsl = true;
+            //smtpClient.Credentials = new System.Net.NetworkCredential("bbot", "F0r3Fr0nt!");
+            message.From = fromAddress;
+            message.To.Add(ToEmail);//if more than comma seprated
+            message.CC.Add(this.Email.Text);
+            message.Subject = subject;
+            message.Priority = MailPriority.High;
+            message.Body = body;
+            message.IsBodyHtml = true;
+            smtpClient.Send(message);

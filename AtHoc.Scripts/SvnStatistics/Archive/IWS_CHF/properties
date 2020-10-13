@@ -1,0 +1,3 @@
+branch.path=https://svn.athoc.com/athoc/eng/branches/Platform/6.1.8.87CP1_CHF
+excluded.paths.list=**/AtHoc.Applications.Web.CDN/**;**/AtHoc.IWS.CDN/**
+release.date=2015-11-10

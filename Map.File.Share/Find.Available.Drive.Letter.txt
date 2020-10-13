@@ -1,0 +1,16 @@
+### Find available Drive letter
+$usedDrives = (Get-PSDrive -PSProvider FileSystem).Name
+$alphabet = [string[]][char[]]([int][char]'D'..[int][char]'Z')
+for ($i = 0; $i -lt $alphabet.Length; $i++) {
+   if ($alphabet[$i] -in (Get-PSDrive -PSProvider FileSystem).Name) {
+         continue
+      } else {
+         $Drive = $alphabet[$i] + ":"
+      break
+   }
+}
+if ([string]::IsNullOrEmpty($Drive)) {
+   throw "No drive letters available."
+}
+
+"Drive=$Drive"

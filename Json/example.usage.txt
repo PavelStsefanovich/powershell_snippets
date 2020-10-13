@@ -1,0 +1,21 @@
+    PS> $json = @'
+    {
+        "cat":  "meow",
+        "dog":  "woof",
+        "programmer":  "derp"
+    }
+    '@
+
+    PS> $json | ConvertFrom-Json
+
+    cat  dog  programmer
+    ---  ---  ----------
+    meow woof derp
+
+    PS> PS> $json | ConvertFrom-Json -As Hashtable
+
+    Name                           Value
+    ----                           -----
+    dog                            woof
+    programmer                     derp
+    cat                            meow

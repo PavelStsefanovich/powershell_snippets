@@ -1,0 +1,22 @@
+<Products> 
+  <Product> 
+    <Name>Root</Name> 
+	<SvnPath>https://svn.athoc.com/athoc/eng</SvnPath>
+  </Product> 
+  <Product> 
+    <Name>IWS</Name> 
+	<SvnPath>https://svn.athoc.com/athoc/eng/trunk/Platform</SvnPath>
+  </Product> 
+  <Product> 
+    <Name>NDS</Name> 
+	<SvnPath>https://svn.athoc.com/athoc/eng/trunk/DeliveryServer/Platform</SvnPath>
+  </Product>
+  <Product> 
+    <Name>PSS</Name> 
+	<SvnPath>https://svn.athoc.com/athoc/eng/trunk/Modules/d911</SvnPath>
+  </Product>   
+  <Product> 
+    <Name>SMS</Name> 
+	<SvnPath>https://svn.athoc.com/athoc/eng/trunk/DeliveryServer/PluginModules/SMS</SvnPath>
+  </Product>    
+</Products>

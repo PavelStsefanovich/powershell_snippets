@@ -1,0 +1,21 @@
+________________________________________
+To find the Version, Culture and PublicKeyToken of an Assembly:
+([system.reflection.assembly]::loadfile("c:\temp\MyDLL.dll")).FullName
+
+________________________________________
+To Add assembly to GAC:
+
+Set-location "c:\temp"
+[System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")
+$publish = New-Object System.EnterpriseServices.Internal.Publish
+$publish.GacInstall("c:\temp\MyDLL.dll")
+iisreset
+
+________________________________________
+To Remove assembly from GAC:
+
+Set-location "c:\temp"
+[System.Reflection.Assembly]::Load("System.EnterpriseServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")
+$publish = New-Object System.EnterpriseServices.Internal.Publish
+$publish.GacRemove("c:\temp\MyDLL.dll")
+iisreset

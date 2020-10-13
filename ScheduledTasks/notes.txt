@@ -1,0 +1,13 @@
+$ErrorActionPreference = 'stop'
+
+$commandline = ".\push_scheduled_task.ps1"
+$commandline += " -computer_name $env:computer_name"
+$commandline += " -user bbot"
+$commandline += " -passw $env:bbotPassword"
+$commandline += " -scheduled_task_name $env:scheduled_task_name"
+if ($env:verbose -eq 'true') {
+   $commandline += " -verbose"
+   write "VERBOSE: $commandline"
+}
+
+iex $commandline

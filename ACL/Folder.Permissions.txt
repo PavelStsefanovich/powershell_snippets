@@ -1,0 +1,14 @@
+# Get the ACL for an existing folder
+$existingAcl = Get-Acl -Path 'C:\DemoFolder'
+
+# Set the permissions that you want to apply to the folder
+$permissions = $env:username, 'Read,Modify', 'ContainerInherit,ObjectInherit', 'None', 'Allow'
+
+# Create a new FileSystemAccessRule object
+$rule = New-Object -TypeName System.Security.AccessControl.FileSystemAccessRule -ArgumentList $permissions
+
+# Modify the existing ACL to include the new rule
+$existingAcl.SetAccessRule($rule)
+
+# Apply the modified access rule to the folder
+$existingAcl | Set-Acl -Path 'C:\DemoFolder'

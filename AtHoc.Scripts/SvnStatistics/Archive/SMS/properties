@@ -1,0 +1,3 @@
+branch.path=https://svn.athoc.com/athoc/eng/trunk/DeliveryServer/PluginModules/SMS/Source/AtHoc.NDS.Plugins.SMS
+excluded.paths.list=AtHoc.NDS.Plugins.SMS/**
+release.date=2015-11-02

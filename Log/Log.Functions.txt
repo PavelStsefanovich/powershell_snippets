@@ -1,0 +1,187 @@
+
+
+function New-Log1 ($inputParameters,$scriptFullPath,$themeColor) { #creates new log file and displays input parameters
+
+    $logFile = $global:logfile
+    $waitTime = $global:waitTime
+
+	$timeStamp = (Get-Date -Format 'M/dd/yyyy  HH:mm:ss').ToString()
+    $fullComputerName = "$env:COMPUTERNAME.$env:USERDNSDOMAIN"
+
+    $logHeader = @("$timeStamp",
+				    "$fullComputerName",
+                    "$scriptFullPath"
+                    "______________________________________________________")
+
+    if ($inputParameters.count -gt 0) {
+
+        $inputParameters.GetEnumerator() | foreach {
+            if ($_.name.tostring().length -lt 7) {$separator = ":`t`t`t`t"}
+            if (($_.name.tostring().length -ge 7) -and ($_.name.tostring().length -lt 15)) {$separator = ":`t`t`t"}
+            if (($_.name.tostring().length -ge 15) -and ($_.name.tostring().length -lt 23)) {$separator = ":`t`t"}
+            if (($_.name.tostring().length -ge 23) -and ($_.name.tostring().length -lt 31)) {$separator = ":`t"}
+
+            $line = $_.name.tostring() + $separator + $_.value.tostring()
+            $logHeader += ,@($line)
+        }
+
+        $logHeader += ,@("______________________________________________________",
+                         "`n")
+    } else {
+
+        $logHeader += ,@(" `n")
+    }
+
+    $logHeader > $logFile
+    " "
+    Write-Host "______________________________________________________" -ForegroundColor $themeColor
+    $logHeader
+
+    sleep -s $waitTime
+}
+
+function Create-Logfile {
+
+    $date = (Get-Date -Format 'M/dd/yyyy  HH:mm:ss').ToString()
+    $logStartline = @("$date",
+                    "-------------------",
+                    "Input parameters:",
+                    " ",
+                    "hotfixPackageFileName:`t$hotfixPackageFileName",
+                    "server:`t`t`t$server",
+                    "Silent:`t`t`t$Silent",
+                    "StopAppForDatabaseUpgrade:`t$StopAppForDatabaseUpgrade",
+                    "-------------------",
+                    "`n")
+
+    Remove-Item ".\$errorFileName" -Force -ErrorAction SilentlyContinue
+
+    if (Test-Path ".\$logFileName") {
+
+        Try
+        {
+            Remove-Item ".\$logFileName" -Force -ErrorAction Stop
+        }
+        Catch
+        {
+            Write-Output "`n$date`t!ERROR: Can't delete old log file `"$logFileName`"" | Out-File ".\$exitErrorFileName" -Force    
+        }
+    }
+    
+    Try
+    {
+        New-Item $logFileName -ItemType File -Force -ErrorAction Stop | Out-Null
+    }
+    Catch
+    {
+        Write-Output "`n$date`t!ERROR: Can't create log file `"$logFileName`". Please check if file already exists or locked" | Out-File ".\$exitErrorFileName" -Force
+        Wait-Anykey
+    }
+
+    Add-Content $logFileName -Value $logStartline
+    Write-Output "`n"
+    $logStartline
+}
+
+function Write-Log ($message,[switch]$error,[switch]$detailed,[switch]$flat) {
+    
+    if ($message) {
+
+        if ($message.GetType().name -eq 'String' -and !($error)) {
+            if ($detailed) {Write-Host "`t$message" -ForegroundColor DarkGray} else {Write-Host $message}
+        }
+
+        $date = (Get-Date -Format 'M/dd/yyyy  HH:mm:ss').ToString()
+    
+        if ($error) {
+            Add-Content $logFileName -Value "$date`t! ERROR:"
+            Add-Content $logFileName -Value $message 
+            Add-Content $logFileName -Value "`t`t`t--- End of error message ---" 
+            $script:errorLevel++  
+        } else { 
+            if ($flat) {Add-Content $logFileName -Value $message}
+            elseif ($detailed) {Add-Content $logFileName -Value "$date`t`t$message"}
+            else {Add-Content $logFileName -Value "$date`t$message" -Force }
+        }
+    }
+
+    Out-Null
+}
+
+function Write-Log1 ([string]$message,[switch]$error,[switch]$warning,[switch]$detailed,[switch]$flat,[switch]$noconsole) { #displays log message and writes to log file
+
+    $logFile = $global:logfile
+
+    if ($message) {
+
+        #--- console output
+        if (!$noconsole) {
+            if ($message.GetType().name -eq 'String') {
+                if ($error) {Write-Host "(!) ERROR: $message" -ForegroundColor Red}
+                elseif ($warning) {Write-Host "(!) Warning: $message" -ForegroundColor Yellow}
+                elseif ($detailed) {Write-Host "`t$message" -ForegroundColor DarkGray}
+                else {Write-Host $message}
+            }
+        }
+
+        #--- output to file
+        $date = (Get-Date -Format 'M/dd/yyyy  HH:mm:ss').ToString()
+
+        if ($error) {
+            Add-Content $logFile -Value "$date`t(!) ERROR:"
+            Add-Content $logFile -Value "err--->"
+            Add-Content $logFile -Value $message
+            Add-Content $logFile -Value "--->err"
+        } elseif ($warning) {
+            Add-Content $logFile -Value "$date`t(!) Warning:"
+            Add-Content $logFile -Value "warn-->"
+            Add-Content $logFile -Value "$message"
+            Add-Content $logFile -Value "-->warn"
+        } elseif ($flat) {
+            Add-Content $logFile -Value $message
+        } elseif ($detailed) {
+            Add-Content $logFile -Value "$date`t   --- $message"
+        } else {Add-Content $logFile -Value "$date`t$message" -Force }
+    }
+
+    Out-Null
+}
+
+function Close-Log {
+    
+    $date = (Get-Date -Format 'M/dd/yyyy  HH:mm:ss').ToString()
+    $logFinishtline = @("`n",
+                    "-------------------",
+                    "$date",
+                    "END")
+    
+    Add-Content $logFileName -Value $logFinishtline
+    Write-Output $logFinishtline
+
+    if ($errorLevel -ne 0) {
+        
+        $outMessage = "Finished with some errors!`nErrorLevel: $Script:errorLevel"
+        Add-Content $logFileName -Value $outMessage
+        Write-Output $outMessage
+
+    } else {
+
+        $outMessage = "Finished Successfully`n"
+        Add-Content $logFileName -Value $outMessage
+        Write-Output $outMessage
+    }
+
+    sleep -s 3
+}
+
+function Exit-OnError ([string]$message,[switch]$append) { #displays error message, stops logging and exits script
+
+    Write-Host "`n! EXIT WITH ERROR: $message" -ForegroundColor Red
+    Write-Host "The script will NOT proceed" -ForegroundColor Yellow
+    Write-Log $message -error
+    if ($append) {$message | Out-File ".\$errorFileName" -Force -Append}
+        else {$message | Out-File ".\$errorFileName" -Force}
+    "ErrorLevel: $script:errorLevel" | Out-File ".\$errorFileName" -Force -Append
+    Wait-Anykey
+    exit 1
+}

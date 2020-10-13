@@ -1,0 +1,3 @@
+
+
+[int]$newprogress = [int][math]::Truncate($currentLine / ($diffOutputLength /100))

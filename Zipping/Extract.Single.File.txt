@@ -1,0 +1,20 @@
+[STRING]$Zipfile = "C:\TEMP\7ZIP_7ZIP_9_2\7ZIP_7ZIP_9_2.appv"
+[STRING]$Filename = "AppxManifest.xml"
+[STRING]$Destination = $env:TEMP
+[STRING]$FILELOCATION = "$Destination\$Filename"
+
+[Reflection.Assembly]::LoadWithPartialName( "System.IO.Compression.FileSystem" ) | Out-Null
+$ZIPSTREAM = [System.IO.Compression.ZipFile]::OpenRead($Zipfile)
+$FILESTREAM = New-Object IO.FileStream ($FILELOCATION) ,'Append','Write','Read'
+
+foreach ($ZIPPEDFILE in $ZIPSTREAM.Entries)
+{
+if ($ZIPPEDFILE.Name -eq $Filename)
+{
+$FILE = $ZIPPEDFILE.Open()
+$FILE.CopyTo($FILESTREAM)
+$FILE.Close()
+}
+}
+$FILE.Close()
+$FILESTREAM.close()

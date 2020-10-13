@@ -1,0 +1,5 @@
+$scriptBlock = {
+  cd E:\Workshop\Python\Anaconda.Jupyter
+  jupyter notebook
+}
+Start-Job -ScriptBlock $scriptBlock

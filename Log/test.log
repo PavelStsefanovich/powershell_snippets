@@ -1,0 +1,2 @@
+[logger_main1.ps1] [ 37] [WARNING] First script log entry
+[logger_main1.ps1] [ 42] [  ERROR] oops!

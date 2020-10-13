@@ -1,0 +1,12 @@
+### INIT COMPRESSION ASSEMBLY:
+Add-Type -AssemblyName "system.io.compression.filesystem"
+
+### CREATE ARCHIVE:
+[io.compression.zipfile]::CreateFromDirectory(<source_dir>, <destination_zip>)
+or
+[io.compression.zipfile]::CreateFromDirectory(<source_dir>, <destination_zip>, "Optimal", $true)
+	Options:	Optimal/Fastest/NoCompression
+				$true/$false (root directory inside archive)
+
+### UNZIP:
+[io.compression.zipfile]::ExtractToDirectory(<destination_zip>, <destination_dir>)

@@ -1,0 +1,23 @@
+$token = $user + ":" + $apiToken
+$tokenBytes=[System.Text.Encoding]::UTF8.GetBytes($token)
+$base64 = [System.Convert]::ToBase64String($tokenBytes)
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+$wc = New-Object System.Net.WebClient
+$wc.Headers.Add("Authorization", "Basic $base64")
+
+
+Jenkins
+$token = "$user`:$pass"
+$tokenBytes=[System.Text.Encoding]::UTF8.GetBytes($token)
+$base64 = [System.Convert]::ToBase64String($tokenBytes)
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+$wc = New-Object System.Net.WebClient
+$wc.Headers.Add("Authorization", "Basic $base64")
+
+$crumb = $wc.DownloadString('https://build.athocdevo.com/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)')
+$wc.Headers.Add($crumb.split(':')[0], $crumb.split(':')[1])
+Now ready for posts
+
+
+$crumb = Invoke-RestMethod -Method Get -Uri 'https://build.athocdevo.com/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)' -Headers @{'Authorization' = "Basic $base64"}
+Invoke-RestMethod -Method post -Uri "https://build.athocdevo.com/job/PStest01/buildWithParameters?user=myuser1&passw=athoc123" -Headers @{'Authorization' = "Basic $base64"; 'Jenkins-Crumb' = 'fcfa5958fa9facbc895fc8c349e1c668'}
