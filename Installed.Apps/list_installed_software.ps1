@@ -23,6 +23,8 @@ If 'all' specified, all supported properties will be displayed, no need to speci
 Example: -properties name, version, publisher
 .PARAMETER out_file_path
 Result set output file path. If not specified, result set is displayed in console instead. Example: -out_file_path app_list.txt
+.LINK
+https://github.com/PavelStsefanovich/powershell_snippets.git
 #>
 
 param (
