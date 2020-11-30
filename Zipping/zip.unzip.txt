@@ -1,12 +1,39 @@
 ### INIT COMPRESSION ASSEMBLY:
 Add-Type -AssemblyName "system.io.compression.filesystem"
 
+
 ### CREATE ARCHIVE:
-[io.compression.zipfile]::CreateFromDirectory(<source_dir>, <destination_zip>)
+[io.compression.zipfile]::CreateFromDirectory($source.fullname, $destination.zip)
 or
-[io.compression.zipfile]::CreateFromDirectory(<source_dir>, <destination_zip>, "Optimal", $true)
+[io.compression.zipfile]::CreateFromDirectory($source.fullname, $destination.zip, "Optimal", $true)
 	Options:	Optimal/Fastest/NoCompression
-				$true/$false (root directory inside archive)
+			true/false (base directory)
+
 
 ### UNZIP:
-[io.compression.zipfile]::ExtractToDirectory(<destination_zip>, <destination_dir>)
+[io.compression.zipfile]::ExtractToDirectory($filePath,$toDir)
+
+
+
+===== embeddable ===========================================
+
+function abspath ($parent = $pwd.Path) {
+    process {
+        if ([System.IO.Path]::IsPathRooted($_)) { $_ }
+        else { Join-Path $parent $_ }
+    }
+}
+
+function zip ($source_dir, $destination_zipfile_path, $compression = 'Optimal', [switch]$include_base_dir) {
+    $source_dir = $source_dir | abspath
+    $destination_zipfile_path = $destination_zipfile_path | abspath
+    Add-Type -AssemblyName "system.io.compression.filesystem"
+    [io.compression.zipfile]::CreateFromDirectory($source_dir, $destination_zipfile_path, $compression, $include_base_dir.IsPresent)
+}
+
+function unzip ($source_zipfile_path, $destination_dir) {
+    $source_zipfile_path = $source_zipfile_path | abspath
+    $destination_dir = $destination_dir | abspath
+    Add-Type -AssemblyName "system.io.compression.filesystem"
+    [io.compression.zipfile]::ExtractToDirectory($source_zipfile_path, $destination_dir)
+}
